@@ -26,13 +26,14 @@ def parse_table(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
     driver.get(URL)
 
     # Локатор дропдаун меню для наведения
-    MARKET_DATA_LOCATOR = ("xpath", "//a[text()='Market Data']")
+    MARKET_DATA_LOCATOR = ("css selector", "#link_2")
     # Элемент для перехода к таблице
-    PRE_OPEN_MARKET_LOCATOR = ("xpath", "//a[text()='Pre-Open Market']")
+    PRE_OPEN_MARKET_LOCATOR = ("css selector", "div.d-none.d-sm-block"
+                                               " a[href='/market-data/pre-open-market-cm-and-emerge-market']")
     # Локатор столбца таблицы с именем (SYMBOL)
-    SYMBOLS_LOCATOR = ("xpath", "//table//tr/td/a[@class='symbol-word-break']")
+    SYMBOLS_LOCATOR = ("css selector", "a.symbol-word-break")
     # Локатор столбца с ценой (FINAL)
-    FINAL_PRICES_LOCATOR = ("xpath", "//table//tr/td[contains(@class, 'bold')]")
+    FINAL_PRICES_LOCATOR = ("css selector", "tr td.bold")
 
     market_data = driver.find_element(*MARKET_DATA_LOCATOR)
     pre_open_market = driver.find_element(*PRE_OPEN_MARKET_LOCATOR)
@@ -67,28 +68,22 @@ def imitate_human(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
     driver.get(URL)
 
     # Локатор элемента, при клике на который открывается нужный график
-    NIFTY_BANK_P_LOCATOR = ("xpath", "//p[@id='NIFTY BANK']")
+    # NIFTY_BANK_P_LOCATOR = ("xpath", "//p[@id='NIFTY BANK']")
+    NIFTY_BANK_P_LOCATOR = ("css selector", "#NIFTY\ BANK")
     # Локатор ссылки для перехода к таблице. День ото дня меняется ссылка, поэтому 2 локатора
-    NIFTY_BANK_VIEWALL_LOCATORS = (("xpath", "(//a[@href='/market-data/live-equity-market?symbol=NIFTY%20BANK'])[1]"),
-                                   ("xpath", "(//a[@href='/market-data/live-equity-market?symbol=NIFTY BANK'])[1]"))
+    NIFTY_BANK_VIEWALL_LOCATOR = ("css selector", "#tab4_gainers_loosers > div.link-wrap > a")
     # Локатор нужного нам элемента в селекторе
-    OPTION_LOCATOR = ("xpath", "//option[@value='NIFTY ALPHA 50']")
+    OPTION_LOCATOR = ("css selector", "#equitieStockSelect > optgroup:nth-child(4) > option:nth-child(7)")
     # Локатор, детектящий загрузку таблицы
-    FREEZED_ROW_LOCATOR = ("xpath", "//tr[@class='freezed-row']")
+    FREEZED_ROW_LOCATOR = ("css selector", "#equityStockTable > tbody > tr.freezed-row")
     # Локатор всей таблицы, для получения размера, нужного для прокрутки вниз
-    TABLE_LOCATOR = ("xpath", "//table[@id='equityStockTable']")
+    TABLE_LOCATOR = ("css selector", "#equityStockTable")
 
     nifty_bank_p = driver.find_element(*NIFTY_BANK_P_LOCATOR)
     nifty_bank_p.click()
 
-    nifty_bank_viewall = None
-    for locator in NIFTY_BANK_VIEWALL_LOCATORS:
-        try:
-            wait.until(EC.visibility_of_element_located(locator))
-            nifty_bank_viewall = driver.find_element(*locator)
-            break
-        except:
-            print("Неверный локатор")
+    wait.until(EC.visibility_of_element_located(NIFTY_BANK_VIEWALL_LOCATOR))
+    nifty_bank_viewall = driver.find_element(*NIFTY_BANK_VIEWALL_LOCATOR)
 
     webdriver.ActionChains(driver) \
         .scroll_to_element(nifty_bank_viewall). \
@@ -100,7 +95,6 @@ def imitate_human(driver: webdriver.Chrome, wait: WebDriverWait) -> None:
                     top: window.scrollY + 100,
                     });
                 """)
-
     nifty_bank_viewall.click()
 
     wait.until(EC.presence_of_element_located(OPTION_LOCATOR))
